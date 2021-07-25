@@ -11,10 +11,11 @@ import java.util.HashMap;
 
 public class Connector {
     private final Connections connections;
-    private HashMap<String, Object> instances;
+    private final HashMap<String, Object> instances;
 
     public Connector(Connections connections) {
         this.connections = connections;
+        this.instances = new HashMap<>();
     }
 
     public Object getConnection(String name) {

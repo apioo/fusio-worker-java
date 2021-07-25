@@ -6,6 +6,6 @@ import org.fusioproject.worker.outgoing.Response;
 
 public interface ActionInterface {
 
-    public Response request(Request request, Context context);
+    Response handle(Request request, Context context) throws Exception;
 
 }
