@@ -1,12 +1,12 @@
 package org.fusioproject.worker;
 
-import org.fusioproject.worker.outgoing.Log;
+import org.fusioproject.worker.generated.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Logger {
-    private final List<Log> logs = new ArrayList<Log>();
+    private final List<Log> logs = new ArrayList<>();
 
     public void emergency(String message, Object context) {
         this.log("EMERGENCY", message, context);
@@ -41,7 +41,7 @@ public class Logger {
     }
 
     private void log(String level, String message, Object context) {
-        this.logs.add(new Log(level, message, context));
+        this.logs.add(new Log(level, message));
     }
 
     public List<Log> getLogs() {

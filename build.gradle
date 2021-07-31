@@ -1,6 +1,4 @@
 plugins {
-	id 'org.springframework.boot' version '2.4.9'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 }
 
@@ -13,11 +11,10 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation group: 'net.openhft', name: 'compiler', version: '2.21ea1'
 	implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.26'
 	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'org.apache.thrift', name: 'libthrift', version: '0.14.2'
 }
 
 test {

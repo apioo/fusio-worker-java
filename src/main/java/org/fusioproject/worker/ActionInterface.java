@@ -1,8 +1,8 @@
 package org.fusioproject.worker;
 
-import org.fusioproject.worker.incoming.Context;
-import org.fusioproject.worker.incoming.Request;
-import org.fusioproject.worker.outgoing.Response;
+import org.fusioproject.worker.generated.Context;
+import org.fusioproject.worker.generated.Request;
+import org.fusioproject.worker.generated.Response;
 
 public interface ActionInterface {
 

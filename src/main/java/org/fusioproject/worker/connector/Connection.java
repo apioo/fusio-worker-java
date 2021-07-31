@@ -1,15 +1,15 @@
 package org.fusioproject.worker.connector;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class Connection {
     private String type;
-    private HashMap<String, String> config;
+    private Map<String, String> config;
 
     public Connection() {
     }
 
-    public Connection(String type, HashMap<String, String> config) {
+    public Connection(String type, Map<String, String> config) {
         this.type = type;
         this.config = config;
     }
@@ -22,11 +22,11 @@ public class Connection {
         this.type = type;
     }
 
-    public HashMap<String, String> getConfig() {
+    public Map<String, String> getConfig() {
         return config;
     }
 
-    public void setConfig(HashMap<String, String> config) {
+    public void setConfig(Map<String, String> config) {
         this.config = config;
     }
 }
