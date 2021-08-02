@@ -56,3 +56,17 @@ public class MyJavaAction extends ActionAbstract {
 }
 
 ```
+
+## Types
+
+This table contains an overview which connection types are implemented
+and which implementation is used:
+
+| Type | Implementation |
+| ---- | -------------- |
+| `Fusio.Adapter.Sql.Connection.Sql` | `mysql / mysql-connector-java`
+| `Fusio.Adapter.Sql.Connection.SqlAdvanced` | `mysql / mysql-connector-java`
+| `Fusio.Adapter.Http.Connection.Http` | `org.apache.httpcomponents / httpclient`
+| `Fusio.Adapter.Mongodb.Connection.MongoDB` | `-`
+| `Fusio.Adapter.Elasticsearch.Connection.Elasticsearch` | `-`
+
