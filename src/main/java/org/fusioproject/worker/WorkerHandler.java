@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.fusioproject.worker.connector.Connections;
 import org.fusioproject.worker.generated.*;
+import org.slf4j.LoggerFactory;
 
 import javax.tools.*;
 import java.io.File;
@@ -21,7 +22,7 @@ public class WorkerHandler implements Worker.Iface {
     private Connections connections;
     private final File connectionsFile = new File("./connections.json");
     private final File actionDir = new File("./actions");
-    private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(WorkerApplication.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WorkerApplication.class);
 
     @Override
     public Message setConnection(Connection connection) {
