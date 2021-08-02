@@ -20,8 +20,8 @@ import java.util.*;
 
 public class WorkerHandler implements Worker.Iface {
     private Connections connections;
-    private final File connectionsFile = new File("./connections.json");
-    private final File actionDir = new File("./actions");
+    private final File connectionsFile = new File("./actions/connections.json");
+    private final File actionsDir = new File("./actions");
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WorkerApplication.class);
 
     @Override
@@ -52,21 +52,21 @@ public class WorkerHandler implements Worker.Iface {
     @Override
     public Message setAction(Action action) {
         try {
-            if (!this.actionDir.exists()){
-                if (!this.actionDir.mkdirs()) {
+            if (!this.actionsDir.exists()){
+                if (!this.actionsDir.mkdirs()) {
                     throw new RuntimeException("Could not create dir");
                 }
             }
 
             String actionClass = this.getClassName(action.getName());
-            File actionFile = new File(this.actionDir.getAbsolutePath() + "/" + actionClass + ".java");
+            File actionFile = new File(this.actionsDir.getAbsolutePath() + "/" + actionClass + ".java");
 
             FileWriter file = new FileWriter(actionFile);
             file.write(action.getCode());
             file.close();
 
             // delete class file
-            File classFile = new File(this.actionDir.getAbsolutePath() + "/" + actionClass + ".class");
+            File classFile = new File(this.actionsDir.getAbsolutePath() + "/" + actionClass + ".class");
             if (classFile.exists()) {
                 classFile.delete();
             }
@@ -76,7 +76,7 @@ public class WorkerHandler implements Worker.Iface {
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
 
-            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(this.actionDir));
+            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(this.actionsDir));
             Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(actionFile));
             JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
 
@@ -162,7 +162,7 @@ public class WorkerHandler implements Worker.Iface {
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
-            URL[] urls = {this.actionDir.toURI().toURL()};
+            URL[] urls = {this.actionsDir.toURI().toURL()};
             return (new URLClassLoader(urls)).loadClass(className);
         }
     }
