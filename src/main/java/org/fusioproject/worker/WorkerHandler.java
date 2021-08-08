@@ -27,6 +27,12 @@ public class WorkerHandler implements Worker.Iface {
     @Override
     public Message setConnection(Connection connection) {
         try {
+            if (!this.actionsDir.exists()){
+                if (!this.actionsDir.mkdirs()) {
+                    throw new RuntimeException("Could not create dir");
+                }
+            }
+
             this.connections = this.readConnections();
 
             if (connection.getName() == null || connection.getName().isEmpty()) {
@@ -68,11 +74,13 @@ public class WorkerHandler implements Worker.Iface {
             // delete class file
             File classFile = new File(this.actionsDir.getAbsolutePath() + "/" + actionClass + ".class");
             if (classFile.exists()) {
-                classFile.delete();
+                if (!classFile.delete()) {
+                    throw new RuntimeException("Could not delete file");
+                }
             }
 
             // compile java file
-            DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<JavaFileObject>();
+            DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<>();
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
 
@@ -81,7 +89,7 @@ public class WorkerHandler implements Worker.Iface {
             JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
 
             if (!task.call()) {
-                List<String> errors = new ArrayList<String>();
+                List<String> errors = new ArrayList<>();
                 for (Diagnostic diagnostic : diagnosticListener.getDiagnostics()) {
                     errors.add(diagnostic.getMessage(Locale.getDefault()) + " on line " + diagnostic.getLineNumber() + " at column " + diagnostic.getColumnNumber());
                 }
@@ -122,18 +130,18 @@ public class WorkerHandler implements Worker.Iface {
                 throw new RuntimeException("Action must be an instance of ActionInterface");
             }
         } catch (Exception e) {
-            HashMap<String, Object> body = new HashMap<String, Object>();
+            HashMap<String, Object> body = new HashMap<>();
             body.put("success", false);
             body.put("message", "An error occurred: " + e.getMessage());
 
             Response response;
             try {
-                response = new Response(500, new HashMap<String, String>(), (new JsonMapper()).writeValueAsString(body));
+                response = new Response(500, new HashMap<>(), (new JsonMapper()).writeValueAsString(body));
             } catch (JsonProcessingException ex) {
-                response = new Response(500, new HashMap<String, String>(), "{\"success\": false, \"message\": \"Could not serialize error JSON response\"}");
+                response = new Response(500, new HashMap<>(), "{\"success\": false, \"message\": \"Could not serialize error JSON response\"}");
             }
 
-            return new Result(response, new ArrayList<Event>(), new ArrayList<Log>());
+            return new Result(response, new ArrayList<>(), new ArrayList<>());
         }
     }
 
