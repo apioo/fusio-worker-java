@@ -1,13 +1,21 @@
 package org.fusioproject.worker;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.fusioproject.worker.connector.Connection;
 import org.fusioproject.worker.connector.Connections;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Connector {
     private final Connections connections;
@@ -30,15 +38,18 @@ public class Connector {
         Connection connection = this.connections.get(name);
 
         if (connection.getType().equals("Fusio.Adapter.Sql.Connection.Sql")) {
+            java.sql.Connection con;
             if (connection.getConfig().get("type").equals("pdo_mysql")) {
-                java.sql.Connection con = this.newSqlConnection("mysql://" + connection.getConfig().get("host") + ":3306/" + connection.getConfig().get("database") + "?user=" + connection.getConfig().get("username") + "&password=" + connection.getConfig().get("password"));
-
-                this.instances.put(name, con);
-
-                return con;
+                con = this.newSqlConnection("mysql://" + connection.getConfig().get("host") + ":3306/" + connection.getConfig().get("database") + "?user=" + connection.getConfig().get("username") + "&password=" + connection.getConfig().get("password"));
+            } else if (connection.getConfig().get("type").equals("pdo_pgsql")) {
+                con = this.newSqlConnection("postgresql://" + connection.getConfig().get("host") + ":5432/" + connection.getConfig().get("database") + "?user=" + connection.getConfig().get("username") + "&password=" + connection.getConfig().get("password"));
             } else {
                 throw new RuntimeException("SQL type is not supported");
             }
+
+            this.instances.put(name, con);
+
+            return con;
         } else if (connection.getType().equals("Fusio.Adapter.Sql.Connection.SqlAdvanced")) {
             java.sql.Connection con = this.newSqlConnection(connection.getConfig().get("url"));
 
@@ -60,6 +71,19 @@ public class Connector {
             this.instances.put(name, client);
 
             return client;
+        } else if (connection.getType().equals("Fusio.Adapter.Mongodb.Connection.MongoDB")) {
+            MongoClient client = MongoClients.create(connection.getConfig().get("url"));
+            MongoDatabase database = client.getDatabase(connection.getConfig().get("database"));
+
+            this.instances.put(name, database);
+
+            return database;
+        } else if (connection.getType().equals("Fusio.Adapter.Elasticsearch.Connection.Elasticsearch")) {
+            RestHighLevelClient client = this.newElasticsearchClient(connection.getConfig().get("host"));
+
+            this.instances.put(name, client);
+
+            return client;
         } else {
             throw new RuntimeException("Provided a not supported connection type");
         }
@@ -71,5 +95,24 @@ public class Connector {
         } catch (SQLException e) {
             throw new RuntimeException("Could not obtain connection", e);
         }
+    }
+
+    private RestHighLevelClient newElasticsearchClient(String host) {
+        String[] hosts = host.split(",");
+        List<HttpHost> list = new ArrayList<>();
+        for (String raw : hosts) {
+            String[] parts = raw.split(":", 2);
+            if (parts.length == 1) {
+                list.add(new HttpHost(parts[0]));
+            } else if (parts.length == 2) {
+                list.add(new HttpHost(parts[0], Integer.parseInt(parts[1])));
+            }
+        }
+
+        if (list.size() == 0) {
+            throw new RuntimeException("Provided host list is empty");
+        }
+
+        return new RestHighLevelClient(RestClient.builder(list.toArray(new HttpHost[0])));
     }
 }

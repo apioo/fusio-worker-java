@@ -37,15 +37,15 @@ public class MyJavaAction extends ActionAbstract {
         Statement stmt = connection.createStatement();
         ResultSet result = stmt.executeQuery("SELECT * FROM app_todo");
 
-        List<HashMap<String, String>> rows = new ArrayList<HashMap<String, String>>();
+        List<HashMap<String, String>> rows = new ArrayList<>();
         while (result.next()) {
-            HashMap<String, String> row = new HashMap<String, String>();
+            HashMap<String, String> row = new HashMap<>();
             row.put("id", result.getString(1));
             row.put("title", result.getString(3));
             rows.add(row);
         }
 
-        HashMap<String, Object> body = new HashMap<String, Object>();
+        HashMap<String, Object> body = new HashMap<>();
         body.put("hello", "foobar");
         body.put("result", rows);
 
@@ -62,11 +62,11 @@ public class MyJavaAction extends ActionAbstract {
 This table contains an overview which connection types are implemented
 and which implementation is used:
 
-| Type | Implementation |
-| ---- | -------------- |
-| `Fusio.Adapter.Sql.Connection.Sql` | `mysql / mysql-connector-java`
-| `Fusio.Adapter.Sql.Connection.SqlAdvanced` | `mysql / mysql-connector-java`
-| `Fusio.Adapter.Http.Connection.Http` | `org.apache.httpcomponents / httpclient`
-| `Fusio.Adapter.Mongodb.Connection.MongoDB` | `-`
-| `Fusio.Adapter.Elasticsearch.Connection.Elasticsearch` | `-`
+| Type | Implementation 
+| ---- | --------------
+| `Fusio.Adapter.Sql.Connection.Sql` | `java.sql.Connection`
+| `Fusio.Adapter.Sql.Connection.SqlAdvanced` | `java.sql.Connection`
+| `Fusio.Adapter.Http.Connection.Http` | `org.apache.http.client.HttpClient`
+| `Fusio.Adapter.Mongodb.Connection.MongoDB` | `com.mongodb.client.MongoDatabase`
+| `Fusio.Adapter.Elasticsearch.Connection.Elasticsearch` | `org.elasticsearch.client.RestHighLevelClient`
 
