@@ -17,4 +17,4 @@ COPY . .
 RUN mvn package
 EXPOSE 9090
 VOLUME /worker/actions
-ENTRYPOINT ["java", "-jar", "target/worker-0.1.0.jar"]
+ENTRYPOINT ["java", "-jar", "target/worker-1.0.0.jar"]
