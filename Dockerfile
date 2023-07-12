@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine
-ARG MAVEN_VERSION=3.8.1
+ARG MAVEN_VERSION=3.9.3
 ARG USER_HOME_DIR="/root"
-ARG SHA=0ec48eb515d93f8515d4abe465570dfded6fa13a3ceb9aab8031428442d9912ec20f066b2afbf56964ffe1ceb56f80321b50db73cf77a0e2445ad0211fb8e38d
+ARG SHA=400fc5b6d000c158d5ee7937543faa06b6bda8408caa2444a9c947c21472fde0f0b64ac452b8cec8855d528c0335522ed5b6c8f77085811c7e29e1bedbb5daa2
 ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
 RUN apk --no-cache add curl
 RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
