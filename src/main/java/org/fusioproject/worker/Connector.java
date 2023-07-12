@@ -1,21 +1,24 @@
 package org.fusioproject.worker;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.fusioproject.worker.connector.Connection;
 import org.fusioproject.worker.connector.Connections;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class Connector {
     private final Connections connections;
@@ -79,7 +82,7 @@ public class Connector {
 
             return database;
         } else if (connection.getType().equals("Fusio.Adapter.Elasticsearch.Connection.Elasticsearch")) {
-            RestHighLevelClient client = this.newElasticsearchClient(connection.getConfig().get("host"));
+            ElasticsearchClient client = this.newElasticsearchClient(connection.getConfig().get("host"), connection.getConfig().get("password"));
 
             this.instances.put(name, client);
 
@@ -97,22 +100,16 @@ public class Connector {
         }
     }
 
-    private RestHighLevelClient newElasticsearchClient(String host) {
-        String[] hosts = host.split(",");
-        List<HttpHost> list = new ArrayList<>();
-        for (String raw : hosts) {
-            String[] parts = raw.split(":", 2);
-            if (parts.length == 1) {
-                list.add(new HttpHost(parts[0]));
-            } else if (parts.length == 2) {
-                list.add(new HttpHost(parts[0], Integer.parseInt(parts[1])));
-            }
-        }
+    private ElasticsearchClient newElasticsearchClient(String host, String apiKey) {
+        RestClient restClient = RestClient
+            .builder(HttpHost.create(host))
+            .setDefaultHeaders(new Header[]{
+                new BasicHeader("Authorization", "ApiKey " + apiKey)
+            })
+            .build();
 
-        if (list.size() == 0) {
-            throw new RuntimeException("Provided host list is empty");
-        }
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
 
-        return new RestHighLevelClient(RestClient.builder(list.toArray(new HttpHost[0])));
+        return new ElasticsearchClient(transport);
     }
 }
