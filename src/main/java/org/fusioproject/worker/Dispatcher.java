@@ -1,25 +1,22 @@
 package org.fusioproject.worker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.fusioproject.worker.generated.Event;
+import org.fusioproject.worker.generated.ResponseEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Dispatcher {
-    private final List<Event> events = new ArrayList<Event>();
-    private final ObjectMapper objectMapper;
+    private final List<ResponseEvent> events = new ArrayList<>();
 
-    public Dispatcher() {
-        this.objectMapper = new ObjectMapper();
+    public void dispatch(String eventName, Object data) {
+        ResponseEvent event = new ResponseEvent();
+        event.setEventName(eventName);
+        event.setData(data);
+
+        this.events.add(event);
     }
 
-    public void dispatch(String eventName, Object data) throws JsonProcessingException {
-        this.events.add(new Event(eventName, this.objectMapper.writeValueAsString(data)));
-    }
-
-    public List<Event> getEvents() {
+    public List<ResponseEvent> getEvents() {
         return this.events;
     }
 }

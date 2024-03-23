@@ -1,7 +1,6 @@
 package org.fusioproject.worker;
 
 public abstract class ActionAbstract implements ActionInterface {
-
     protected Connector connector;
     protected Dispatcher dispatcher;
     protected Logger logger;

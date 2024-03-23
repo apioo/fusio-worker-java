@@ -14,7 +14,6 @@ ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 WORKDIR /worker
 COPY . .
-RUN mvn package
 EXPOSE 9090
 VOLUME /worker/actions
-ENTRYPOINT ["java", "-jar", "target/worker-1.0.0.jar"]
+ENTRYPOINT ["mvnw", "clean", "spring-boot:run"]

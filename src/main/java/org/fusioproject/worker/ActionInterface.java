@@ -1,11 +1,11 @@
 package org.fusioproject.worker;
 
-import org.fusioproject.worker.generated.Context;
-import org.fusioproject.worker.generated.Request;
-import org.fusioproject.worker.generated.Response;
+import org.fusioproject.worker.generated.ExecuteContext;
+import org.fusioproject.worker.generated.ExecuteRequest;
+import org.fusioproject.worker.generated.ResponseHTTP;
 
 public interface ActionInterface {
 
-    Response handle(Request request, Context context) throws Exception;
+    ResponseHTTP handle(ExecuteRequest request, ExecuteContext context) throws Exception;
 
 }
