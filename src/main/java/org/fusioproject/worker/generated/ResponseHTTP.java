@@ -2,9 +2,7 @@ package org.fusioproject.worker.generated;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import java.util.Map;
-
 public class ResponseHTTP {
     private Integer statusCode;
     private Map<String, String> headers;

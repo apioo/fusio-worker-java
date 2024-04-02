@@ -2,9 +2,7 @@ package org.fusioproject.worker.generated;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import java.util.Map;
-
 public class ExecuteRequestContext {
     private String type;
     private Map<String, String> uriFragments;

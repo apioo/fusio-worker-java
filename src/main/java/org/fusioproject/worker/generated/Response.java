@@ -2,7 +2,6 @@ package org.fusioproject.worker.generated;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import java.util.List;
 public class Response {
     private ResponseHTTP response;
