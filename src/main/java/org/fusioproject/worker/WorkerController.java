@@ -1,19 +1,13 @@
 package org.fusioproject.worker;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import org.fusioproject.worker.generated.*;
 import org.springframework.web.bind.annotation.*;
 
-import javax.tools.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 @RestController
 public class WorkerController {
@@ -33,18 +27,25 @@ public class WorkerController {
         Connector connector = new Connector(execute.getConnections());
         Dispatcher dispatcher = new Dispatcher();
         Logger logger = new Logger();
+        ResponseBuilder responseBuilder = new ResponseBuilder();
 
-        Class<?> actionClass = this.loadClass(action);
-        Class<?>[] constructorSignature = {Connector.class, Dispatcher.class, Logger.class};
-        Constructor<?> constructor = actionClass.getDeclaredConstructor(constructorSignature);
+        File actionFile = this.getActionFile(action);
+        Binding binding = new Binding();
+        binding.setProperty("request", execute.getRequest());
+        binding.setProperty("context", execute.getContext());
+        binding.setProperty("connector", connector);
+        binding.setProperty("response", responseBuilder);
+        binding.setProperty("dispatcher", dispatcher);
+        binding.setProperty("logger", logger);
 
-        Object instance = constructor.newInstance(connector, dispatcher, logger);
+        GroovyShell shell = new GroovyShell(binding);
+        shell.evaluate(actionFile);
 
-        if (!(instance instanceof ActionInterface)) {
-            throw new RuntimeException("Action must be an instance of ActionInterface");
+        ResponseHTTP response = responseBuilder.getResponse();
+        if (response == null) {
+            response = new ResponseHTTP();
+            response.setStatusCode(204);
         }
-
-        ResponseHTTP response = ((ActionInterface) instance).handle(execute.getRequest(), execute.getContext());
 
         Response result = new Response();
         result.setEvents(dispatcher.getEvents());
@@ -62,15 +63,12 @@ public class WorkerController {
             }
         }
 
-        File actionClass = this.getActionClass(action);
         File actionFile = this.getActionFile(action);
         String code = update.getCode();
 
         FileWriter file = new FileWriter(actionFile);
         file.write(code);
         file.close();
-
-        compileClass(actionClass, actionFile);
 
         return newMessage(true, "Update action successful");
     }
@@ -90,28 +88,7 @@ public class WorkerController {
             }
         }
 
-        File actionClass = this.getActionClass(action);
-        if (actionClass.exists()) {
-            if (!actionClass.delete()) {
-                throw new RuntimeException("Could not delete action class");
-            }
-        }
-
         return newMessage(true, "Action successfully deleted");
-    }
-
-    private File getActionClass(String action) {
-        return new File(this.actionsDir.getAbsolutePath() + "/" + this.getActionClassName(action) + ".class");
-    }
-
-    private String getActionClassName(String action) {
-        if (!action.matches("/^[A-Za-z0-9_-]{3,30}$/")) {
-            throw new RuntimeException("Provided no valid action name");
-        }
-
-        action = action.replace('-', '_');
-
-        return action;
     }
 
     private File getActionFile(String action) {
@@ -119,7 +96,7 @@ public class WorkerController {
             throw new RuntimeException("Provided no valid action name");
         }
 
-        return new File(this.actionsDir.getAbsolutePath() + "/" + action + ".java");
+        return new File(this.actionsDir.getAbsolutePath() + "/" + action + ".groovy");
     }
 
     private Message newMessage(boolean success, String message) {
@@ -128,50 +105,5 @@ public class WorkerController {
         ret.setMessage(message);
 
         return ret;
-    }
-
-    private void compileClass(File actionClass, File actionFile) throws IOException {
-        if (actionClass.exists()) {
-            if (!actionClass.delete()) {
-                throw new RuntimeException("Could not delete action class");
-            }
-        }
-
-        // compile java file
-        DiagnosticCollector<JavaFileObject> diagnosticListener = new DiagnosticCollector<>();
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
-
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(this.actionsDir));
-        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(actionFile));
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, compilationUnits);
-
-        if (!task.call()) {
-            List<String> errors = new ArrayList<>();
-            for (Diagnostic diagnostic : diagnosticListener.getDiagnostics()) {
-                errors.add(diagnostic.getMessage(Locale.getDefault()) + " on line " + diagnostic.getLineNumber() + " at column " + diagnostic.getColumnNumber());
-            }
-
-            throw new RuntimeException("Could not compile file: " + String.join(", ", errors));
-        }
-
-        fileManager.close();
-    }
-
-    private Class<?> loadClass(String action) throws IOException, ClassNotFoundException {
-        String className = this.getActionClassName(action);
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            URL[] urls = {
-                this.actionsDir.toURI().toURL()
-            };
-
-            URLClassLoader loader = URLClassLoader.newInstance(urls);
-            Class<?> result = loader.loadClass(className);
-            loader.close();
-
-            return result;
-        }
     }
 }

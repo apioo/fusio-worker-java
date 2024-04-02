@@ -1,0 +1,9 @@
+{
+  "type": "model-java",
+  "require": {
+    "fusio/worker": {
+      "target": "./src/main/java/org/fusioproject/worker/generated",
+      "namespace": "org.fusioproject.worker.generated"
+    }
+  }
+}
