@@ -65,12 +65,15 @@ public class WorkerController {
 
         File actionFile = this.getActionFile(action);
         String code = update.getCode();
+        if (code == null) {
+            throw new RuntimeException("Provided no code");
+        }
 
         FileWriter file = new FileWriter(actionFile);
         file.write(code);
         file.close();
 
-        return newMessage(true, "Update action successful");
+        return this.newMessage(true, "Update action successful");
     }
 
     @DeleteMapping(value="/{action}", produces="application/json")
@@ -88,11 +91,11 @@ public class WorkerController {
             }
         }
 
-        return newMessage(true, "Action successfully deleted");
+        return this.newMessage(true, "Action successfully deleted");
     }
 
     private File getActionFile(String action) {
-        if (!action.matches("/^[A-Za-z0-9_-]{3,30}$/")) {
+        if (!action.matches("^[A-Za-z0-9_-]{3,30}$")) {
             throw new RuntimeException("Provided no valid action name");
         }
 
