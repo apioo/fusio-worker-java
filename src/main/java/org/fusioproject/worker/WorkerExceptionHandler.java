@@ -1,6 +1,6 @@
 package org.fusioproject.worker;
 
-import org.fusioproject.worker.generated.Message;
+import org.fusioproject.worker.runtime.generated.Message;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
