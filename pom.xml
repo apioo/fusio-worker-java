@@ -10,7 +10,6 @@
 	</parent>
 	<groupId>org.fusio-project</groupId>
 	<artifactId>worker</artifactId>
-	<version>0.1.0</version>
 	<name>worker</name>
 	<description>Fusio worker implementation</description>
 	<properties>
