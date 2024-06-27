@@ -68,7 +68,7 @@ public class WorkerController {
     }
 
     private File getActionFile(String action) {
-        if (!action.matches("^[A-Za-z0-9_-]{3,30}$")) {
+        if (!action.matches("^[A-Za-z0-9_-]{3,255}$")) {
             throw new RuntimeException("Provided no valid action name");
         }
 
