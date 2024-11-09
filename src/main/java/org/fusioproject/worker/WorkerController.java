@@ -12,7 +12,7 @@ import java.io.IOException;
 public class WorkerController {
     private final File actionsDir = new File("./actions");
 
-    private Runtime runtime;
+    private final Runtime runtime;
 
     public WorkerController() {
         this.runtime = new Runtime();
