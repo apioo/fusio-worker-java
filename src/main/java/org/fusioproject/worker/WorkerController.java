@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @RestController
 public class WorkerController {
@@ -50,7 +52,7 @@ public class WorkerController {
     }
 
     @DeleteMapping(value="/{action}", produces="application/json")
-    public Message delete(@PathVariable("action") String action) {
+    public Message delete(@PathVariable("action") String action) throws IOException {
         if (!this.actionsDir.exists()){
             if (!this.actionsDir.mkdirs()) {
                 throw new RuntimeException("Could not create dir");
@@ -67,12 +69,35 @@ public class WorkerController {
         return this.newMessage(true, "Action successfully deleted");
     }
 
-    private File getActionFile(String action) {
+    private File getActionFile(String action) throws IOException {
+        String name = action;
+        String hash = null;
+
+        int idx = action.indexOf('@');
+        if (idx != -1) {
+            name = action.substring(0, idx);
+            hash = action.substring(idx + 1);
+        }
+
+        return this.getActionFile(name, hash);
+    }
+
+    private File getActionFile(String action, String hash) throws IOException {
         if (!action.matches("^[A-Za-z0-9_-]{3,255}$")) {
             throw new RuntimeException("Provided no valid action name");
         }
 
-        return new File(this.actionsDir.getAbsolutePath() + "/" + action + ".groovy");
+        var baseDir = Paths.get(this.actionsDir.getAbsolutePath() + '/' + action);
+        if (!Files.isDirectory(baseDir)) {
+            Files.createDirectories(baseDir);
+        }
+
+        var fileName = "main";
+        if (hash != null && !hash.isEmpty()) {
+            fileName = hash;
+        }
+
+        return new File(baseDir + "/" + fileName + ".groovy");
     }
 
     private Message newMessage(boolean success, String message) {
