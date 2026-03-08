@@ -1,4 +1,4 @@
-FROM openjdk:22-slim
+FROM eclipse-temurin:25-jdk-alpine
 WORKDIR /worker
 COPY . .
 RUN chmod +x ./mvnw
