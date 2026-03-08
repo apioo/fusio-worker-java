@@ -83,8 +83,9 @@ public class WorkerController {
     }
 
     private File getActionFile(String action, String hash) throws IOException {
-        if (!action.matches("^[A-Za-z0-9_-]{3,255}$")) {
-            throw new RuntimeException("Provided no valid action name");
+        this.assertAction(action);
+        if (hash != null && !hash.isEmpty()) {
+            this.assertHash(hash);
         }
 
         var baseDir = Paths.get(this.actionsDir.getAbsolutePath() + '/' + action);
@@ -98,6 +99,18 @@ public class WorkerController {
         }
 
         return new File(baseDir + "/" + fileName + ".groovy");
+    }
+
+    private void assertAction(String action) {
+        if (action == null || !action.matches("^[A-Za-z0-9_-]{3,255}$")) {
+            throw new RuntimeException("Provided no valid action name");
+        }
+    }
+
+    private void assertHash(String hash) {
+        if (hash == null || !hash.matches("^[A-Za-z0-9]{3,255}$")) {
+            throw new RuntimeException("Provided no valid action hash");
+        }
     }
 
     private Message newMessage(boolean success, String message) {
